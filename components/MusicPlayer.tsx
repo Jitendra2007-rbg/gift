@@ -13,13 +13,25 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ autoPlayRequest }) => 
 
   useEffect(() => {
     if (autoPlayRequest && audioRef.current) {
-      audioRef.current.play()
-        .then(() => setIsPlaying(true))
-        .catch((err) => {
-          console.error("Audio autoplay blocked or failed:", err);
-          setHasError(true);
-          setIsPlaying(false);
-        });
+      // Small delay to ensure audio element is ready
+      const timer = setTimeout(() => {
+        if (audioRef.current) {
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                setIsPlaying(true);
+                setHasError(false);
+              })
+              .catch((err) => {
+                console.error("Audio autoplay blocked or failed:", err);
+                setHasError(false); // Don't show error ring
+                setIsPlaying(false);
+              });
+          }
+        }
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [autoPlayRequest]);
 
@@ -47,6 +59,12 @@ export const MusicPlayer: React.FC<MusicPlayerProps> = ({ autoPlayRequest }) => 
         src={CONTENT.musicUrl} 
         loop 
         preload="auto"
+        crossOrigin="anonymous"
+        onCanPlay={() => {
+          if (audioRef.current && audioRef.current.paused) {
+            audioRef.current.play().catch(err => console.error('Play failed:', err));
+          }
+        }}
       />
       
       {/* Equalizer animation when playing */}

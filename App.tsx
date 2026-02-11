@@ -7,9 +7,11 @@ import { FinalMessage } from './components/FinalMessage';
 import { FloatingHearts } from './components/FloatingHearts';
 import { CursorTrail } from './components/CursorTrail';
 import { MusicPlayer } from './components/MusicPlayer';
+import { LockScreen } from './components/LockScreen';
 
 export default function App() {
   const [hasEntered, setHasEntered] = useState(false);
+  const [isLocked, setIsLocked] = useState(true);
 
   const handleEnter = () => {
     setHasEntered(true);
@@ -17,8 +19,20 @@ export default function App() {
     window.scrollTo(0, 0);
   };
 
+  const handleUnlock = () => {
+    setIsLocked(false);
+    // Automatically enter main site when unlocked
+    setTimeout(() => {
+      setHasEntered(true);
+      window.scrollTo(0, 0);
+    }, 500); // Small delay for smooth transition
+  };
+
   return (
     <div className="relative min-h-screen bg-romantic-50 font-sans overflow-x-hidden">
+      {/* Lock Screen - Shows until Feb 14, 12am */}
+      {isLocked && <LockScreen onUnlock={handleUnlock} />}
+      
       {/* Global visual effects */}
       <FloatingHearts />
       {/* Only show custom cursor trail on desktop to avoid mobile touch issues */}
